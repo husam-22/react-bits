@@ -1,0 +1,547 @@
+@import 'tailwindcss';
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Design tokens. Colours follow the proposed palette of the brief; the derived
+   shades exist only to keep text contrast at AA level (see docs/TESTING.md).
+   ──────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-ivory: #f4f0e8;
+  --color-ivory-deep: #ebe5d9;
+  --color-forest: #132a29;
+  --color-forest-soft: #1b3836;
+  --color-ink: #182724;
+  --color-ink-soft: #4a5a56;
+  --color-brass: #b69a65;
+  --color-brass-deep: #75603a;
+  --color-brass-light: #d6c29a;
+  --color-line: #d9d2c5;
+  --color-line-dark: #2e4745;
+  --color-danger: #9f2f24;
+
+  --font-sans: var(--font-plex-arabic), 'Segoe UI', Tahoma, Arial, sans-serif;
+
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --breakpoint-xs: 26rem;
+}
+
+:root {
+  --header-h: 68px;
+  --shell-pad: clamp(20px, 4vw, 80px);
+  --section-pad: clamp(56px, 9vw, 136px);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --header-h: 84px;
+    --shell-pad: clamp(24px, 4vw, 80px);
+  }
+}
+
+@layer base {
+  html {
+    background-color: var(--color-ivory);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-h) + 16px);
+  }
+
+  body {
+    min-height: 100vh;
+    min-height: 100svh;
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 0.94rem + 0.28vw, 1.1875rem);
+    line-height: 1.8;
+    font-weight: 400;
+    /* Arabic must never be letter-spaced. */
+    letter-spacing: 0;
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    line-height: 1.3;
+    text-wrap: balance;
+    color: var(--color-forest);
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-brass-light);
+    color: var(--color-forest);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass-deep);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  .on-dark :is(h1, h2, h3, h4) {
+    color: var(--color-ivory);
+  }
+
+  .on-dark :focus-visible,
+  .on-dark:focus-visible {
+    outline-color: var(--color-brass-light);
+  }
+
+  /* Phone numbers, e-mail addresses and other Latin runs keep their own direction inside Arabic text. */
+  .ltr {
+    direction: ltr;
+    unicode-bidi: isolate;
+    display: inline-block;
+  }
+}
+
+@layer components {
+  .shell {
+    width: 100%;
+    max-width: calc(1440px + 2 * var(--shell-pad));
+    margin-inline: auto;
+    padding-inline: var(--shell-pad);
+  }
+
+  .section {
+    padding-block: var(--section-pad);
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    font-weight: 500;
+    color: var(--color-brass-deep);
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 2.25rem;
+    height: 1px;
+    background-color: currentColor;
+    flex: none;
+  }
+
+  .on-dark .eyebrow {
+    color: var(--color-brass-light);
+  }
+
+  .display-title {
+    font-size: clamp(2.125rem, 9vw, 2.875rem);
+    line-height: 1.22;
+    font-weight: 600;
+  }
+
+  .section-title {
+    font-size: clamp(1.75rem, 1.2rem + 2.4vw, 3.375rem);
+    line-height: 1.28;
+    font-weight: 600;
+  }
+
+  .lead {
+    font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.25rem);
+    line-height: 1.85;
+    color: var(--color-ink-soft);
+    max-width: 62ch;
+  }
+
+  .on-dark .lead {
+    color: color-mix(in srgb, var(--color-ivory) 82%, transparent);
+  }
+
+  @media (min-width: 1024px) {
+    .display-title {
+      font-size: clamp(2.75rem, 5.2vw, 5rem);
+      line-height: 1.18;
+    }
+  }
+
+  .skip-link {
+    position: fixed;
+    inset-block-start: 0.75rem;
+    inset-inline-start: 0.75rem;
+    z-index: 100;
+    padding: 0.625rem 1rem;
+    background-color: var(--color-forest);
+    color: var(--color-ivory);
+    font-weight: 500;
+    border-radius: 3px;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0);
+    outline-color: var(--color-brass-light);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Mobile menu (native <dialog>)
+   ──────────────────────────────────────────────────────────────────────────── */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+.mobile-menu::backdrop {
+  background-color: rgb(19 42 41 / 0.45);
+}
+
+.mobile-menu[open] {
+  animation: menu-in 240ms var(--ease-out-soft);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+html[data-motion='reduced'] .mobile-menu[open] {
+  animation: none;
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Hero and scroll story: "من الأرض إلى الصرح"
+
+   One markup, two layouts:
+   • static (default): the copy and the poster in normal flow. This is what a browser without JavaScript,
+     or a visitor who prefers reduced motion, gets. Nothing is pinned.
+   • story (html[data-story='on']): one pinned stage. The attribute is written by the inline boot script
+     before the first paint, so the tall section never appears or collapses after load.
+
+   Pinning is done by CSS (position: sticky). JavaScript only reads the scroll position; it never moves
+   the page, so the scrollbar, keyboard, touch and anchor links keep their native behaviour.
+   ──────────────────────────────────────────────────────────────────────────── */
+.story {
+  position: relative;
+  isolation: isolate;
+}
+
+.story__hero {
+  position: relative;
+}
+
+.story__copy {
+  position: relative;
+  z-index: 2;
+  padding-block: calc(var(--header-h) + 1.5rem) 1.25rem;
+}
+
+.story__track {
+  position: relative;
+  z-index: 1;
+}
+
+.story__sticky {
+  position: relative;
+  overflow: clip;
+}
+
+/* The stage holds the poster and, above it, the 3D canvas. It is a size container so the poster can be
+   sized from the stage itself (cqw/cqh) in every layout. */
+.story__stage {
+  position: relative;
+  container-type: size;
+  aspect-ratio: 945 / 870;
+}
+
+.story__poster,
+.story__canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Phones and tablets: the cropped poster, fitted inside the stage and centred. */
+.story__poster img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(100cqw, 100cqh * 945 / 870);
+  max-width: none;
+  height: auto;
+  transform: translate(-50%, -50%);
+  /* The render's background is a shade warmer than the page: dissolve its edges instead of showing a box. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 9%, #000 93%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 9%, #000 93%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* Image-sequence fallback: a 2D canvas placed exactly where the cropped poster sits. */
+.story__frames {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(100cqw, 100cqh * 945 / 870);
+  height: auto;
+  aspect-ratio: 945 / 870;
+  transform: translate(-50%, -50%);
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 6%, #000 96%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 3%, #000 97%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 6%, #000 96%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 3%, #000 97%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.story__captions,
+.story__hint {
+  display: none;
+}
+
+.story__static {
+  position: relative;
+  z-index: 2;
+}
+
+/* Desktop, static layout: copy on the right ~40%, the poster behind it on the left. */
+@media (min-width: 1024px) {
+  .story__copy {
+    display: flex;
+    align-items: center;
+    min-height: min(92vh, 60rem);
+    min-height: min(92svh, 60rem);
+    padding-block: calc(var(--header-h) + 1rem) 2.5rem;
+  }
+
+  .story__track,
+  .story__sticky,
+  .story__stage {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto;
+  }
+
+  .story__poster,
+  .story__canvas {
+    /* Wide poster, bottom-left. Limited by height too, so the building never slides under the header. */
+    --poster-w: min(90cqw, (100cqh - var(--header-h)) * 1.95);
+  }
+
+  /* Desktop frames cover the visible part of the poster box (its left 5% is off screen). */
+  .story__frames {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: calc(var(--poster-w) * 0.95);
+    aspect-ratio: 1231 / 729;
+    transform: none;
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 8%),
+      linear-gradient(to left, transparent 0%, #000 6%);
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 8%),
+      linear-gradient(to left, transparent 0%, #000 6%);
+  }
+
+  .story__poster img {
+    top: auto;
+    bottom: 0;
+    left: calc(var(--poster-w) * -0.05);
+    width: var(--poster-w);
+    transform: none;
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 12%, #000 94%, transparent 100%),
+      linear-gradient(to left, transparent 0%, #000 9%);
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, #000 12%, #000 94%, transparent 100%),
+      linear-gradient(to left, transparent 0%, #000 9%);
+  }
+}
+
+/* ── Story layout ───────────────────────────────────────────────────────────
+   The two media conditions below are mirrored in src/lib/motion.ts (storyMedia). Keep them in sync.
+   Very short screens (a phone held sideways, a squeezed desktop window) keep the static layout: a pinned
+   stage there would leave no room for the scene or would clip the buttons. */
+
+/* Phones and tablets: the copy scrolls away normally, then the stage is pinned under the header with the
+   scene on top and its caption underneath. */
+@media (max-width: 1023.98px) and (orientation: portrait), (max-width: 1023.98px) and (min-height: 540.02px) {
+  html[data-story='on'] .story__static {
+    display: none;
+  }
+
+  html[data-story='on'] .story__track {
+    height: 170vh;
+    height: 170svh;
+  }
+
+  html[data-story='on'] .story__sticky {
+    position: sticky;
+    top: var(--header-h);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--header-h));
+    height: calc(100svh - var(--header-h));
+  }
+
+  /* The scene keeps the poster's proportions and gives up height only on short screens. */
+  html[data-story='on'] .story__stage {
+    flex: 0 1 auto;
+    min-height: 0;
+  }
+
+  html[data-story='on'] .story__captions {
+    display: block;
+    flex: none;
+  }
+}
+
+/* Desktop: copy and stage are pinned together for the whole journey. */
+@media (min-width: 1024px) and (min-height: 640px) {
+  html[data-story='on'] .story__static {
+    display: none;
+  }
+
+  html[data-story='on'] .story__copy {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    min-height: 0;
+    pointer-events: none;
+  }
+
+  html[data-story='on'] .story__copy > * > * {
+    pointer-events: auto;
+  }
+
+  html[data-story='on'] .story__track {
+    position: relative;
+    inset: auto;
+    height: 260vh;
+    height: 260svh;
+    margin-top: -100vh;
+    margin-top: -100svh;
+  }
+
+  html[data-story='on'] .story__sticky {
+    position: sticky;
+    inset: auto;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+  }
+
+  html[data-story='on'] .story__captions {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding-top: var(--header-h);
+    pointer-events: none;
+  }
+
+  html[data-story='on'] .story__captions > * > * {
+    pointer-events: auto;
+  }
+
+  html[data-story='on'] .story__hint {
+    display: flex;
+  }
+}
+
+/* Entrance of the hero copy: CSS only, so it never waits for JavaScript. */
+.hero-in {
+  animation: hero-in 0.8s var(--ease-out-soft) both;
+  animation-delay: calc(var(--i, 0) * 80ms + 60ms);
+}
+
+.hero-poster-in {
+  animation: hero-poster-in 1.1s var(--ease-out-soft) both;
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+}
+
+@keyframes hero-poster-in {
+  from {
+    opacity: 0;
+    transform: scale(1.025);
+  }
+}
+
+/* No replay when returning to the page, and none with reduced motion. */
+[data-intro='done'] .hero-in,
+[data-intro='done'] .hero-poster-in,
+html[data-motion='reduced'] .hero-in,
+html[data-motion='reduced'] .hero-poster-in {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='full']) .hero-in,
+  html:not([data-motion='full']) .hero-poster-in {
+    animation: none;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Small shared effects
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Content that replaces other content in place (filtered lists, form states). */
+.swap-in {
+  animation: swap-in 0.35s var(--ease-out-soft) both;
+}
+
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+html[data-motion='reduced'] .swap-in {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='full']) .swap-in {
+    animation: none;
+  }
+}
+
+/* Image zoom on hover: at most 1.035, only where a real pointer can hover. */
+.zoom-frame {
+  overflow: hidden;
+}
+
+.zoom-frame img {
+  transition: transform 0.9s var(--ease-out-soft);
+}
+
+@media (hover: hover) {
+  .group:hover .zoom-frame img {
+    transform: scale(1.035);
+  }
+}
+
+html[data-motion='reduced'] .zoom-frame img {
+  transition: none;
+  transform: none !important;
+}
